@@ -8,17 +8,23 @@
 using namespace std;
 using namespace cv;
 
-double dimensions = 400;
+double dimensions = 800;
 
 int main(){
     Mat frame = Mat::zeros(dimensions, dimensions, CV_8UC3);
-    int x = 0;
-    int y = 0;
-
-    Coordinates drawCoord = Coordinates(x, y);
-    Graphics drawer = Graphics();
-
-    drawer.drawCircle(frame, drawCoord, Scalar(0, 255, 0));
+    vector<MazeBlockQuery> makeVector;
+    
+    makeVector.push_back(MazeBlockQuery(1, Maze::generateWallsList(false, true, false, true)));
+    makeVector.push_back(MazeBlockQuery(2, true, Maze::generateWallsList(false, false, false, true)));
+    makeVector.push_back(MazeBlockQuery(8, true, Maze::generateWallsList(true, false, false, false)));
+    makeVector.push_back(MazeBlockQuery(9, Maze::generateWallsList(false, true, false, true)));
+    makeVector.push_back(MazeBlockQuery(10, Maze::generateWallsList(true, false, false, false)));
+    makeVector.push_back(MazeBlockQuery(11, true, Maze::generateWallsList(false, true, false, false)));
+    
+    Maze mainMaze = Maze(makeVector);
+    
+    
+    frame = mainMaze.drawFrame(frame);
     
     imshow("test frame", frame);
 

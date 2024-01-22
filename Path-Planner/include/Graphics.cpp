@@ -20,24 +20,20 @@ class Coordinates{
         
         // Setter Methods
         void updateCoordinates(int tempX, int tempY, coordinateType type){
-            if(type == coordinateType::raw){
+            if(type == coordinateType::maze){
                 // converting to raw
                 x = dimensions/8 + dimensions/4 * tempX;
                 y = dimensions/8 + dimensions/4 * tempY;
                 // converting to euler
                 x = x - dimensions/2;
                 y = dimensions/2 - y;
-            }else if(type == coordinateType::maze){
+            }else if(type == coordinateType::raw){
                 x = tempX - dimensions/2;
                 y = dimensions/2 - tempY;
             }else{
                 x = tempX;
                 y = tempY;
             }
-        }
-        void convertFromRaw(int tempX, int tempY){
-            x = tempX - dimensions/2;
-            y = dimensions/2 - tempY;
         }
         // Getter Methods
         int getX(coordinateType type = coordinateType::raw){
@@ -71,13 +67,14 @@ class Coordinates{
             return Coordinates(x, y + deltaY);
         }
         Coordinates addXandY(int deltaX, int deltaY){
-            return Coordinates(x + deltaX, y + deltaY);
+            return Coordinates(x + deltaX, y + deltaY, euler, dimensions);
         }
-        Coordinates(int tempX, int tempY, coordinateType type = coordinateType::euler){
+        Coordinates(int tempX, int tempY, coordinateType type = coordinateType::euler, int d = 0){
+            dimensions = d;
             if(type == coordinateType::raw){
-                convertFromRaw(tempX, tempY) ;
+                updateCoordinates(tempX, tempY, raw);
             }else if(type == coordinateType::maze){
-
+                updateCoordinates(tempX, tempY, maze);
             }else{
                 x = tempX;
                 y = tempY;   
@@ -91,13 +88,13 @@ class Graphics{
         void drawLine(Mat frame, Coordinates p1, Coordinates p2, Scalar color, int thickness){
             line(frame, Point(p1.getX(), p1.getY()), Point(p2.getX(), p2.getY()), color, thickness);
         }
-        Mat drawCircle(Mat frame, Coordinates center, Scalar color, int radius = 2, int thickness = -1){
+        void drawCircle(Mat frame, Coordinates center, Scalar color, int radius = 2, int thickness = -1){
             circle(frame, Point(center.getX(), center.getY()), radius, color, thickness);
-            return frame;
         }
-        void drawRectangle(Mat frame, Coordinates center, int width, int height, Scalar color, int thickness = -1){
+        void drawRectangle(Mat frame, Coordinates center, int width, int height, Scalar color, int thickness = -1, bool addDots = false){
             Coordinates p1 = center.addXandY(width/2, height/2);
             Coordinates p2 = center.addXandY(-1 * width/2, -1 * height/2);
+            
             rectangle(frame, Point(p1.getX(), p1.getY()), Point(p2.getX(), p2.getY()), color, thickness);
         }
 };

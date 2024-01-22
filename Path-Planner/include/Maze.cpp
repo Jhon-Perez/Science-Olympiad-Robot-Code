@@ -6,6 +6,8 @@
 using namespace cv;
 using namespace std;
 
+#pragma once
+
 /*
     Maze Class Initialization : 
     Gate ID's : 
@@ -36,13 +38,26 @@ class MazeBlockQuery{
         bool end = false;
         MazeBlockQuery(int id, bool gate, const vector<Direction> &wal){
             blockId = id;
-            gate = gate;
+            isGate = gate;
             walls = wal;
+        }
+        MazeBlockQuery(int id, bool gate){
+            blockId = id;
+            isGate = gate;
+        }
+        MazeBlockQuery(int id, const vector<Direction> &wal){
+            blockId = id;
+            walls = wal;
+            cout << "Directions : " << endl;
+            for(Direction dir : walls){
+                cout << dir << endl;
+            }
+            cout << endl;
         }
 };
 
 class MazeBlock{
-    private: 
+    public :
         // Wall Info
         bool wallTop;
         bool wallBottom;
@@ -52,7 +67,7 @@ class MazeBlock{
         bool gateHere;
         bool start;
         bool end;
-    public :
+    
         MazeBlock(bool top, bool bottom, bool left, bool right, bool gate, bool d, bool s, bool e){
             wallTop = top;
             wallBottom = bottom;
@@ -101,14 +116,16 @@ class Maze{
                         if(x!=3) matrix[y][x + 1].modifyWalls(Direction::left);
                         break;
                     case Direction::bottom :
-                        if(y!=0) matrix[y - 1][x].modifyWalls(Direction::top);
+                        if(y!=3) matrix[y + 1][x].modifyWalls(Direction::top);
+                        cout << " this is the transform : " << y - 1 << " " << x << endl;
                         break;
                     case Direction::top :
-                        if(y!=3) matrix[y + 1][x].modifyWalls(Direction::bottom);
+                        if(y!=0) matrix[y - 1][x].modifyWalls(Direction::bottom);
                         break;
                 }
             }
             // updating gate status
+            cout << query.isGate << endl;
             matrix[y][x].setGateValue(query.isGate);
             // updating start/finish status
             if(query.end){
@@ -122,8 +139,61 @@ class Maze{
                 for(int j = 0; j < 4; j++)
                     matrix[i][j] = MazeBlock();
             for(MazeBlockQuery mod : modifications){
-            
                 updateBlock(mod);
             }
         }
+        Mat drawFrame(Mat initialFrame){
+            Mat frame = initialFrame.clone();
+            Graphics g = Graphics();
+            int dim = frame.size().height;
+            g.drawRectangle(frame, Coordinates(0, 0, euler, dim), dim, dim, cv::Scalar(255, 255, 255), -1 );
+            // Drawing the general grid
+            for(int i = 0; i < 4; i++)
+                for(int j = 0; j < 4; j++){
+                    Coordinates center = Coordinates(i, j, coordinateType::maze, dim);
+                    g.drawRectangle(frame, center, dim/4, dim/4, cv::Scalar(207, 194, 186), 15);
+                    //g.drawCircle(frame, center, Scalar(255, 0, 0), 5, -1);
+                }
+            // Drawing the gates
+            for(int i = 0; i < 4; i++)
+                for(int j = 0; j < 4; j++){
+                    Coordinates center = Coordinates(i, j, coordinateType::maze, dim);
+                    if(matrix[j][i].gateHere) g.drawRectangle(frame, center, dim/4, dim/4, cv::Scalar(255, 0, 0), 15);
+                }
+            // Drawing the walls
+            for(int x = 0; x < 4; x++)
+                for(int y = 0; y < 4; y++){
+                    Coordinates center = Coordinates(x, y, coordinateType::maze, dim);
+                    cout << x << " " << y << " " << matrix[x][y].wallBottom << " " << matrix[x][y].wallTop << endl;
+                    Coordinates topLeft = center.addXandY(-1 * dim/8, 1 * dim/8);
+                    Coordinates topRight = center.addXandY(1 * dim/8, 1 * dim/8);
+                    Coordinates bottomLeft = center.addXandY(-1 * dim/8, -1 * dim/8);
+                    Coordinates bottomRight = center.addXandY(1 * dim/8, -1 * dim/8);
+                    
+                    if(matrix[y][x].wallBottom){
+                        g.drawLine(frame, bottomLeft, bottomRight, cv::Scalar(0, 75, 150), 15);
+                    }
+                    if(matrix[y][x].wallRight){
+                        g.drawLine(frame, bottomRight, topRight, cv::Scalar(0, 75, 150), 15);
+                    }
+                    if(matrix[y][x].wallLeft){
+                        g.drawLine(frame, bottomLeft, bottomLeft, cv::Scalar(0, 75, 150), 15);
+                    }
+                    if(matrix[y][x].wallTop){
+                        g.drawLine(frame, topLeft, topRight, cv::Scalar(0, 75, 150), 15);
+                    }
+                }
+            // Drawing Outer Borders
+            g.drawRectangle(frame, Coordinates(0, 0, euler, dim), dim, dim, cv::Scalar(207, 194, 186), 25 );
+            return frame;
+        }
+        static vector<Direction> generateWallsList(bool top, bool bottom, bool left, bool right){
+            vector<Direction> answerVector;
+            if(right) answerVector.push_back(Direction::right);
+            if(left) answerVector.push_back(Direction::left);
+            if(top) answerVector.push_back(Direction::top);
+            if(bottom) answerVector.push_back(Direction::bottom);
+            return answerVector;
+        }
+        
 };
