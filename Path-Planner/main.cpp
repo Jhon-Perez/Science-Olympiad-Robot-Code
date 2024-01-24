@@ -14,6 +14,8 @@ int main(){
     Mat frame = Mat::zeros(dimensions, dimensions, CV_8UC3);
     vector<MazeBlockQuery> makeVector;
     
+    makeVector.push_back(MazeBlockQuery(1, false, true));
+    makeVector.push_back(MazeBlockQuery(13, true, false));
     makeVector.push_back(MazeBlockQuery(1, Maze::generateWallsList(false, true, false, true)));
     makeVector.push_back(MazeBlockQuery(2, true, Maze::generateWallsList(false, false, false, true)));
     makeVector.push_back(MazeBlockQuery(8, true, Maze::generateWallsList(true, false, false, false)));
@@ -21,8 +23,7 @@ int main(){
     makeVector.push_back(MazeBlockQuery(10, Maze::generateWallsList(true, false, false, false)));
     makeVector.push_back(MazeBlockQuery(11, true, Maze::generateWallsList(false, true, false, false)));
     
-    Maze mainMaze = Maze(makeVector);
-    
+    Maze mainMaze = Maze(makeVector, dimensions);
     
     frame = mainMaze.drawFrame(frame);
     

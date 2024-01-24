@@ -45,14 +45,14 @@ class MazeBlockQuery{
             blockId = id;
             isGate = gate;
         }
+        MazeBlockQuery(int id, bool s, bool e){
+            blockId = id;
+            start = s;
+            end = e;
+        }
         MazeBlockQuery(int id, const vector<Direction> &wal){
             blockId = id;
             walls = wal;
-            cout << "Directions : " << endl;
-            for(Direction dir : walls){
-                cout << dir << endl;
-            }
-            cout << endl;
         }
 };
 
@@ -97,12 +97,35 @@ class MazeBlock{
         }
 };
 
+class Node{
+    public : 
+        Coordinates* currentLocation;
+        Coordinates* previousLocation;
+        int distance;
+        // Constructors
+        Node(Coordinates* cl){
+            currentLocation = cl;
+            previousLocation = nullptr;
+            distance = NULL;
+        }
+        Node(Coordinates* cl, Coordinates* pl, int d){
+            currentLocation = cl;
+            previousLocation = pl;
+            distance = d;
+        }
+        Node(){
+            currentLocation = nullptr;
+            previousLocation = nullptr;
+            distance = NULL;
+        }
+};
+
 class Maze{
     public : 
         MazeBlock matrix[4][4];
         Coordinates start = Coordinates(0, 0);
         Coordinates end = Coordinates(0, 0);
-        void updateBlock(MazeBlockQuery query){
+        void updateBlock(MazeBlockQuery query, int dimensions){
             // updating walls
             int y = query.blockId/4;
             int x = query.blockId%4;
@@ -117,7 +140,6 @@ class Maze{
                         break;
                     case Direction::bottom :
                         if(y!=3) matrix[y + 1][x].modifyWalls(Direction::top);
-                        cout << " this is the transform : " << y - 1 << " " << x << endl;
                         break;
                     case Direction::top :
                         if(y!=0) matrix[y - 1][x].modifyWalls(Direction::bottom);
@@ -125,21 +147,22 @@ class Maze{
                 }
             }
             // updating gate status
-            cout << query.isGate << endl;
             matrix[y][x].setGateValue(query.isGate);
             // updating start/finish status
             if(query.end){
-                end.updateCoordinates(x, y, coordinateType::maze);
+                cout << " end dimensions : " << x << " " << y << endl;
+                end.updateCoordinates(x, y, coordinateType::maze, dimensions);
             }else if(query.start){
-                start.updateCoordinates(x, y, coordinateType::maze);
+                cout << " start dimensions : " << x << " " << y << endl;
+                start.updateCoordinates(x, y, coordinateType::maze, dimensions);
             }
         }
-        Maze(vector<MazeBlockQuery> &modifications){
+        Maze(vector<MazeBlockQuery> &modifications, int dimensions){
             for(int i = 0; i < 4; i++)
                 for(int j = 0; j < 4; j++)
                     matrix[i][j] = MazeBlock();
             for(MazeBlockQuery mod : modifications){
-                updateBlock(mod);
+                updateBlock(mod, dimensions);
             }
         }
         Mat drawFrame(Mat initialFrame){
@@ -164,7 +187,6 @@ class Maze{
             for(int x = 0; x < 4; x++)
                 for(int y = 0; y < 4; y++){
                     Coordinates center = Coordinates(x, y, coordinateType::maze, dim);
-                    cout << x << " " << y << " " << matrix[x][y].wallBottom << " " << matrix[x][y].wallTop << endl;
                     Coordinates topLeft = center.addXandY(-1 * dim/8, 1 * dim/8);
                     Coordinates topRight = center.addXandY(1 * dim/8, 1 * dim/8);
                     Coordinates bottomLeft = center.addXandY(-1 * dim/8, -1 * dim/8);
@@ -185,6 +207,13 @@ class Maze{
                 }
             // Drawing Outer Borders
             g.drawRectangle(frame, Coordinates(0, 0, euler, dim), dim, dim, cv::Scalar(207, 194, 186), 25 );
+            // Drawing Start and Finish
+            g.drawCircle(frame, start, Scalar(0, 200, 0), 20, -1);
+            g.drawCircle(frame, end, Scalar(0, 0, 255), 20, -1);
+            return frame;
+        }
+        Mat drawNode(Node path){
+            Mat frame;
             return frame;
         }
         static vector<Direction> generateWallsList(bool top, bool bottom, bool left, bool right){

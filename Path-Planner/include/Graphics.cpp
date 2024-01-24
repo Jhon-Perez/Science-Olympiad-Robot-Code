@@ -19,7 +19,8 @@ class Coordinates{
     public : 
         
         // Setter Methods
-        void updateCoordinates(int tempX, int tempY, coordinateType type){
+        void updateCoordinates(int tempX, int tempY, coordinateType type, int dim = -1){
+            if(dim != -1) dimensions = dim;
             if(type == coordinateType::maze){
                 // converting to raw
                 x = dimensions/8 + dimensions/4 * tempX;
@@ -79,6 +80,11 @@ class Coordinates{
                 x = tempX;
                 y = tempY;   
             }
+        }
+        Coordinates(){
+            x = 0;
+            y = 0;
+            dimensions = 0;
         }
 };
 
