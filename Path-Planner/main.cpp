@@ -23,11 +23,11 @@ int main(){
     //makeVector.push_back(MazeBlockQuery(9, Maze::generateWallsList(false, true, false, true)));
     //makeVector.push_back(MazeBlockQuery(10, Maze::generateWallsList(true, false, false, false)));
     //makeVector.push_back(MazeBlockQuery(11, true, Maze::generateWallsList(false, true, false, false)));
-    
     Maze mainMaze = Maze(makeVector, dimensions);
     PathGeneration engine = PathGeneration(mainMaze.start, mainMaze.end, mainMaze);
+    
     engine.BFS();
-
+    cout << engine.finalNodes.size() << endl;
     frame = mainMaze.drawFrame(frame);
     
     imshow("test frame", frame);

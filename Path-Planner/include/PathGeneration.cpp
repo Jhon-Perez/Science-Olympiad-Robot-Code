@@ -90,21 +90,22 @@ class Path{
 
 class PathGeneration{
     private:
-        vector<Block> finalNodes;
         queue<Block> frontier;
         vector<Block*> explored;
         Coordinates target;
         Maze outline;
     public:
+        vector<Block> finalNodes;
         PathGeneration(Coordinates s, Coordinates t, Maze o){
             finalNodes.clear();
-            while(frontier.empty()) frontier.pop();
+            while(frontier.empty() == false) frontier.pop();
             explored.clear();
             frontier.push(Block(&s));
             target = t;
             outline = o;
         }
         void BFS(){
+            cout << "working " << finalNodes.size() << endl;
             if(frontier.size() == 0) return;
             // updating frontier
             Block currentBlock = frontier.back();
@@ -131,7 +132,6 @@ class PathGeneration{
                     frontier.push(transposedNode);
                 }
             }
-            cout << "working" << endl;
             return BFS();
         }
         void generatePath(Block node, Path ref, int level = 0){
