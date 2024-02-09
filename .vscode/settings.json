@@ -4,6 +4,10 @@
         "tuple": "cpp",
         "vector": "cpp",
         "atomic": "cpp",
-        "bitset": "cpp"
-    }
+        "bitset": "cpp",
+        "iostream": "cpp",
+        "queue": "cpp",
+        "ostream": "cpp"
+    },
+    "cmake.sourceDirectory": "/Users/joshikvarshik/Documents/unnam/joshik/coding/Science-Olympiad-Robot-Code/Path-Planner"
 }

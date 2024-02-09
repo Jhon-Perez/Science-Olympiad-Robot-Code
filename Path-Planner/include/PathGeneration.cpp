@@ -9,10 +9,10 @@ class Path{
     private:
         int smth;
         Maze guide;
-        vector<Coordinates> locationList;
         vector<Direction> movesList;
         int gates = 0;
     public: 
+        vector<Coordinates> locationList;
         Path(Maze g){
             guide = g;
         }
@@ -82,6 +82,18 @@ class Path{
                 addCoordinate(loc);
             }
         }
+        void print(){
+            cout << endl;
+            cout << " Path : ";
+            for(int i = 0; i < movesList.size(); i++){
+                Direction move = movesList[i];
+                if(move == Direction::top) cout << " Top" << "(" << locationList[i].x << "," << locationList[i].y << ")"<< ",";
+                else if(move == Direction::bottom) cout << " Bottom" << "(" << locationList[i].x << "," << locationList[i].y << ")"<< ",";
+                else if(move == Direction::left) cout << " Left" << "(" << locationList[i].x << "," << locationList[i].y << ")"<< ",";
+                else if(move == Direction::right) cout << " Right" << "(" << locationList[i].x << "," << locationList[i].y << ")"<< ",";
+            }
+            cout << endl;
+        }
         void heuristic(){
         }
         void optimizeLinearSpeed(){
@@ -91,54 +103,91 @@ class Path{
 class PathGeneration{
     private:
         queue<Block> frontier;
-        vector<Block*> explored;
+        vector<Block> explored;
         Coordinates target;
         Maze outline;
+        int iteration = 0;
     public:
         vector<Block> finalNodes;
         PathGeneration(Coordinates s, Coordinates t, Maze o){
             finalNodes.clear();
             while(frontier.empty() == false) frontier.pop();
             explored.clear();
-            frontier.push(Block(&s));
+            frontier.push(Block(s));
             target = t;
             outline = o;
         }
-        void BFS(){
-            cout << "working " << finalNodes.size() << endl;
-            if(frontier.size() == 0) return;
+        void BFS(Maze curM, int level = 0){
+            iteration++;
             // updating frontier
-            Block currentBlock = frontier.back();
+            if(frontier.size() == 0) return;
+            Block currentBlock = frontier.front();
             frontier.pop();
-            explored.push_back(&currentBlock);
+            explored.push_back(currentBlock);
+           /* cout << "Current Block " << currentBlock.currentLocation.getX(maze) << " " << currentBlock.currentLocation.getY(maze) << " Dimensions : " << currentBlock.currentLocation.dimensions << " Explored : ";
+            for(Block n : explored){
+                cout << "(" << n.currentLocation.getX(maze) << "," << n.currentLocation.getY(maze) << ") ";
+            }*/
             // Defining the base case
-            if(((*currentBlock.currentLocation) == target && finalNodes.size() == 5)){
-                return;
+            if(currentBlock.currentLocation.x == target.x && currentBlock.currentLocation.y == target.y){
+                finalNodes.push_back(currentBlock);
             }
+            if(finalNodes.size() == 5) return;
             // Pushing new nodes to frontier
-            vector<Direction> movesList =  outline.getPossibleMoves(*currentBlock.currentLocation);
+            vector<Direction> movesList =  outline.getPossibleMoves(currentBlock.currentLocation);
+            //cout << "Moves List : " << movesList[0] << endl;
+            //cout << " Transposed : ";
             for(Direction move : movesList){
-                Coordinates transposedLocation = outline.transpose(*currentBlock.currentLocation, move);\
+                Coordinates transposedLocation = outline.transpose((currentBlock.currentLocation), move);
                 // checking explored
                 bool flag = true;
-                for(Block* ref : explored){
-                    if(*((*ref).currentLocation) == transposedLocation){
+                for(int i = 0; i < explored.size(); i++){
+                    Block ref = explored[i];
+                   // cout << "|(" << ref.currentLocation.x << "(" <<  ref.currentLocation.getX(maze) <<")" << "," << ref.currentLocation.y << "(" <<  ref.currentLocation.getY(maze) << ")" <<  ")==(" << transposedLocation.x << "(" <<  transposedLocation.getX(maze) <<")" << "," << transposedLocation.y << "(" <<  transposedLocation.getY(maze) <<")"<< ")|";
+                    if(ref.currentLocation.x == transposedLocation.x && ref.currentLocation.y == transposedLocation.y){
                         flag = false;
                         break;
                     }
                 }
+                //cout << " " << move << " -> (" << transposedLocation.getX(maze) << "," << transposedLocation.getY(maze) << ") Passed : " << flag << " ";
                 if(flag){
-                    Block transposedNode = Block(&transposedLocation, &currentBlock);
+                    Block transposedNode = Block(transposedLocation, explored.size() - 1);
                     frontier.push(transposedNode);
+                }else{
+                    flag = true;
+                    Path checkPath =  generatePath(currentBlock, curM);
+                    for(Coordinates point : checkPath.locationList){
+                        if(point.x == transposedLocation.x && point.y == transposedLocation.y){
+                            flag = false;
+                            break;
+                        }
+                    }
+                    if(flag){
+                        Block transposedNode = Block(transposedLocation, explored.size() - 1);
+                        frontier.push(transposedNode);
+                    }
                 }
             }
-            return BFS();
+            /*cout << " frontier : ";
+            queue<Block> copyQ = frontier;
+            cout << endl;
+            while(copyQ.empty() == false){
+                cout << "(" << copyQ.front().currentLocation.getX(maze) << "," << copyQ.front().currentLocation.getY(maze)<< "), ";
+                copyQ.pop();
+            }
+            cout << endl;
+            cout << endl;*/
+            return BFS(curM, level + 1);
         }
-        void generatePath(Block node, Path ref, int level = 0){
-            ref.addCoordinate(*node.currentLocation);
-            if(node.previousBlock == NULL) return;
-            generatePath(*node.previousBlock, ref, level + 1);
-            if(level == 0) ref.reverse();
-            return;
+        Path generatePath(Block node, Maze curMaze, int level = 0){
+            Block curNode = node;
+            Path ref = Path(curMaze);
+            ref.addCoordinate(curNode.currentLocation);
+            while(curNode.previousBlockIndex != -1){
+                curNode = explored[curNode.previousBlockIndex];
+                ref.addCoordinate(curNode.currentLocation);    
+            }
+            ref.reverse();
+            return ref;
         }
 };

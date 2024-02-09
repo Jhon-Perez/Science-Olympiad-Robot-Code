@@ -39,8 +39,10 @@ class Coordinates{
                 // converting to raw
                 x = dimensions/8 + dimensions/4 * tempX;
                 y = dimensions/8 + dimensions/4 * tempY;
+             //   cout << "x1 here : "<< x;
                 // converting to euler
                 x = x - dimensions/2;
+               // cout << " x2 here : " << x << endl;
                 y = dimensions/2 - y;
             }else if(type == coordinateType::raw){
                 x = tempX - dimensions/2;
