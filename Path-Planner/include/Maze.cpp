@@ -102,16 +102,17 @@ class Block{
         Coordinates currentLocation;
         int previousBlockIndex;
         int distance;
+        int startIndex = -1;
         // Constructors
         Block(Coordinates cl){
             currentLocation = cl;
             previousBlockIndex = -1;
             distance = 1;
         }
-        Block(Coordinates cl, int pl, int d){
+        Block(Coordinates cl, int pl, int si){
             currentLocation = cl;
             previousBlockIndex = pl;
-            distance = d;
+            startIndex = si;
         }
         Block(Coordinates cl, int pl){
             currentLocation = cl;
@@ -129,6 +130,7 @@ class Maze{
         MazeBlock matrix[4][4];
         Coordinates start = Coordinates(0, 0);
         Coordinates end = Coordinates(0, 0);
+        vector<Coordinates> gates;
         void updateBlock(MazeBlockQuery query, int dimensions){
             // updating walls
             int y = query.blockId/4;
@@ -152,12 +154,23 @@ class Maze{
             }
             // updating gate status
             matrix[y][x].setGateValue(query.isGate);
+            if(query.isGate){
+                cout << "x, y" << endl;
+                gates.push_back(Coordinates(x, y, maze, dimensions));
+            }
             // updating start/finish status
             if(query.end){                
                 end.updateCoordinates(x, y, coordinateType::maze, dimensions);
             }else if(query.start){
                 start.updateCoordinates(x, y, coordinateType::maze, dimensions);
             }
+        }
+        int getGateId(Coordinates gateLoc){
+            for(int i = 0; i < gates.size(); i++){
+                Coordinates gate = gates[i];
+                if(gate.equals(gateLoc)) return i;
+            }
+            return -2;
         }
         Maze(){}
         Maze(vector<MazeBlockQuery> &modifications, int dimensions){

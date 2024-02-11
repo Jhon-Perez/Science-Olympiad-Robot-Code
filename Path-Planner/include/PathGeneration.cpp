@@ -1,6 +1,7 @@
 #include<vector>
 #include<queue>
 #include"Maze.cpp"
+#include<unordered_map>
 
 using namespace std;
 
@@ -104,54 +105,80 @@ class PathGeneration{
     private:
         queue<Block> frontier;
         vector<Block> explored;
+        unordered_map<int, int> startingCounter;
+        vector<int> keys;
         Coordinates target;
         Maze outline;
-        int iteration = 0;
     public:
         vector<Block> finalNodes;
-        PathGeneration(Coordinates s, Coordinates t, Maze o){
+        PathGeneration(vector<Coordinates> s, Coordinates t, Maze o){
+            reset(s, t);
+            outline = o;
+        }
+        PathGeneration(Maze o){
+
+            outline = o;
+        }
+        void newStart(vector<Coordinates> s){
+            reset(s, target);    
+        }
+        void reset(vector<Coordinates> s, Coordinates t){
             finalNodes.clear();
             while(frontier.empty() == false) frontier.pop();
             explored.clear();
-            frontier.push(Block(s));
+            keys.clear();
+            for(Coordinates startCoordinates : s){
+                startCoordinates.print();
+                frontier.push(Block(startCoordinates));
+                startingCounter[frontier.size() - 1] = 0;
+                keys.push_back(frontier.size() - 1);
+            }
             target = t;
-            outline = o;
+        }
+        void reset(){
+            finalNodes.clear();
+            while(frontier.empty() == false) frontier.pop();
+            explored.clear();
         }
         void BFS(Maze curM, int level = 0){
-            iteration++;
             // updating frontier
-            if(frontier.size() == 0) return;
+            if(frontier.size() == 0) {
+                cout << "FINISH : Insufficent Frontier!" << endl;
+                return;
+            }
             Block currentBlock = frontier.front();
             frontier.pop();
             explored.push_back(currentBlock);
-           /* cout << "Current Block " << currentBlock.currentLocation.getX(maze) << " " << currentBlock.currentLocation.getY(maze) << " Dimensions : " << currentBlock.currentLocation.dimensions << " Explored : ";
-            for(Block n : explored){
-                cout << "(" << n.currentLocation.getX(maze) << "," << n.currentLocation.getY(maze) << ") ";
-            }*/
             // Defining the base case
-            if(currentBlock.currentLocation.x == target.x && currentBlock.currentLocation.y == target.y){
+            if(currentBlock.currentLocation.x == target.x && currentBlock.currentLocation.y == target.y && startingCounter[currentBlock.startIndex] < 5){
                 finalNodes.push_back(currentBlock);
             }
-            if(finalNodes.size() == 5) return;
+            // Checking for instances
+            bool pathsFound = true;
+            for(int key : keys){
+                if(startingCounter[key] < 5){
+                    pathsFound = false;
+                    break;
+                }
+            }
+            if(pathsFound) return;
             // Pushing new nodes to frontier
             vector<Direction> movesList =  outline.getPossibleMoves(currentBlock.currentLocation);
-            //cout << "Moves List : " << movesList[0] << endl;
-            //cout << " Transposed : ";
             for(Direction move : movesList){
                 Coordinates transposedLocation = outline.transpose((currentBlock.currentLocation), move);
                 // checking explored
                 bool flag = true;
                 for(int i = 0; i < explored.size(); i++){
                     Block ref = explored[i];
-                   // cout << "|(" << ref.currentLocation.x << "(" <<  ref.currentLocation.getX(maze) <<")" << "," << ref.currentLocation.y << "(" <<  ref.currentLocation.getY(maze) << ")" <<  ")==(" << transposedLocation.x << "(" <<  transposedLocation.getX(maze) <<")" << "," << transposedLocation.y << "(" <<  transposedLocation.getY(maze) <<")"<< ")|";
                     if(ref.currentLocation.x == transposedLocation.x && ref.currentLocation.y == transposedLocation.y){
                         flag = false;
                         break;
                     }
                 }
-                //cout << " " << move << " -> (" << transposedLocation.getX(maze) << "," << transposedLocation.getY(maze) << ") Passed : " << flag << " ";
                 if(flag){
-                    Block transposedNode = Block(transposedLocation, explored.size() - 1);
+                    Block transposedNode;
+                    if(currentBlock.startIndex == -1) transposedNode = Block(transposedLocation, explored.size() - 1, explored.size() - 1);
+                    else transposedNode = Block(transposedLocation, explored.size() - 1);
                     frontier.push(transposedNode);
                 }else{
                     flag = true;
@@ -163,20 +190,13 @@ class PathGeneration{
                         }
                     }
                     if(flag){
-                        Block transposedNode = Block(transposedLocation, explored.size() - 1);
+                        Block transposedNode;
+                        if(currentBlock.startIndex == -1) transposedNode = Block(transposedLocation, explored.size() - 1, explored.size() - 1);
+                        else transposedNode = Block(transposedLocation, explored.size() - 1);
                         frontier.push(transposedNode);
                     }
                 }
             }
-            /*cout << " frontier : ";
-            queue<Block> copyQ = frontier;
-            cout << endl;
-            while(copyQ.empty() == false){
-                cout << "(" << copyQ.front().currentLocation.getX(maze) << "," << copyQ.front().currentLocation.getY(maze)<< "), ";
-                copyQ.pop();
-            }
-            cout << endl;
-            cout << endl;*/
             return BFS(curM, level + 1);
         }
         Path generatePath(Block node, Maze curMaze, int level = 0){
@@ -189,5 +209,50 @@ class PathGeneration{
             }
             ref.reverse();
             return ref;
+        }
+};
+
+class subPathId{
+    public : 
+        int start;
+        int end;
+        Coordinates startCoordinate;
+        Coordinates endCoordinate;
+        vector<Path> paths;
+        subPathId(){
+            start = -1;
+            end = -1;
+        }
+        subPathId(int s, int e, Coordinates sc, Coordinates ec){
+            start = s;
+            end = e;
+            startCoordinate = sc;
+            endCoordinate = ec;
+        }
+        void addPath(Path tempPath){
+            if(tempPath.locationList.size() != 0 && tempPath.locationList[0].equals(startCoordinate) && tempPath.locationList[tempPath.locationList.size() - 1].equals(endCoordinate)){
+                paths.push_back(tempPath);
+            }
+        }
+        void print(){
+            if(start > -1){
+                cout << "G" << start << "->";
+            }else if(start == -1){
+                cout << "S->";
+            }
+            if(end > -1){
+                cout << "G" << end << endl;
+            }else if(end == -1){
+                cout << "F" << endl;
+            }
+        }
+        bool operator == (const subPathId &c){ 
+            return start == c.start && end == c.end;
+        } 
+        bool equals(subPathId other){
+            return other.start == start && other.end == end;
+        }
+        bool equals(int s, int e){
+            return s == start && end == e;
         }
 };

@@ -33,6 +33,9 @@ class Coordinates{
             dimensions = 0;
         }
         // Setter Methods
+        bool equals(Coordinates otherCoord){
+            return otherCoord.x == x && otherCoord.y == y;
+        }
         void updateCoordinates(int tempX, int tempY, coordinateType type, int dim = -1){
             if(dim != -1) dimensions = dim;
             if(type == coordinateType::maze){
@@ -51,6 +54,10 @@ class Coordinates{
                 x = tempX;
                 y = tempY;
             }
+        }
+        void print(coordinateType t = maze, bool n = false){
+            cout << "(" << getX(t) << "," << getY(t) << ")";
+            if(n) cout << endl;
         }
         // Getter Methods
         int getX(coordinateType type = coordinateType::raw){
