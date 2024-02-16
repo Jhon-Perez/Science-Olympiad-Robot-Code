@@ -29,6 +29,17 @@ enum Direction{
     right = 3
 };
 
+struct mazeParameters{
+    int blockId;
+    bool wallTop = false;
+    bool wallBottom = false;
+    bool wallLeft = false;
+    bool wallRight = false;
+    bool isGate = false;
+    bool start = false;
+    bool end = false;
+};
+
 class MazeBlockQuery{
     public : 
         int blockId;

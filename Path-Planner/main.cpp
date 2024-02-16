@@ -12,29 +12,14 @@ using namespace cv;
 
 double dimensions = 800;
 
-void getBestPath(){
-    // Initializing Image and timing
+void getBestPath(Maze mainMaze){
+    //! Initializing Image and timing
     clock_t start, end;
     start = clock();
     Mat frame = Mat::zeros(dimensions, dimensions, CV_8UC3);
-    
-    // Defining the Maze Walls
-    vector<MazeBlockQuery> makeVector;
-    
-    makeVector.push_back(MazeBlockQuery(1, false, true));
-    makeVector.push_back(MazeBlockQuery(13, true, false));
-    makeVector.push_back(MazeBlockQuery(1, Maze::generateWallsList(false, true, false, true)));
-    makeVector.push_back(MazeBlockQuery(2, true, Maze::generateWallsList(false, false, false, true)));
-    makeVector.push_back(MazeBlockQuery(8, true, Maze::generateWallsList(true, false, false, false)));
-    makeVector.push_back(MazeBlockQuery(9, Maze::generateWallsList(false, true, false, true)));
-    makeVector.push_back(MazeBlockQuery(10, Maze::generateWallsList(true, false, false, false)));
-    makeVector.push_back(MazeBlockQuery(11, true, Maze::generateWallsList(false, true, false, false)));
-    
-    // Declaring Maze and Other Variables
-    Maze mainMaze = Maze(makeVector, dimensions);
     PathGeneration engine = PathGeneration(mainMaze);
 
-    // Declaring all Algo Sub-Paths
+    //! Declaring all Algo Sub-Paths
     vector<subPathId> subPaths;
     for(int start = 0; start <= mainMaze.gates.size(); start++){
         for(int end = 0; end <= mainMaze.gates.size(); end++)
@@ -58,8 +43,8 @@ void getBestPath(){
     }
     for(subPathId id : subPaths) id.print();
 
-    // Defining all Algo Sub-Paths
-    //? gate to gate
+    //! Defining all Algo Sub-Paths
+    //? gate 2 gate
     vector<Coordinates> startingPoints;
     for(int target = 0; target < mainMaze.gates.size(); target++){
         startingPoints.clear();
@@ -101,7 +86,9 @@ void getBestPath(){
             subPaths[j].addPath(tempPath);
         }
     }
-    // Displaying Output
+    //! Combining Paths
+    
+    //! Displaying Output
     end = clock();
     frame = mainMaze.drawFrame(frame);
 
@@ -124,6 +111,20 @@ void getBestPath(){
 }
 
 int main(){
-    getBestPath();    
+    //! Defining the Maze Walls
+    vector<MazeBlockQuery> makeVector;
+    
+    makeVector.push_back(MazeBlockQuery(1, false, true));
+    makeVector.push_back(MazeBlockQuery(13, true, false));
+    makeVector.push_back(MazeBlockQuery(1, Maze::generateWallsList(false, true, false, true)));
+    makeVector.push_back(MazeBlockQuery(2, true, Maze::generateWallsList(false, false, false, true)));
+    makeVector.push_back(MazeBlockQuery(8, true, Maze::generateWallsList(true, false, false, false)));
+    makeVector.push_back(MazeBlockQuery(9, Maze::generateWallsList(false, true, false, true)));
+    makeVector.push_back(MazeBlockQuery(10, Maze::generateWallsList(true, false, false, false)));
+    makeVector.push_back(MazeBlockQuery(11, true, Maze::generateWallsList(false, true, false, false)));
+    
+    //! Declaring Maze and Other Variables
+    Maze mainMaze = Maze(makeVector, dimensions);
+    getBestPath(mainMaze);    
     return 1;
 }

@@ -17,6 +17,12 @@ class Path{
         Path(Maze g){
             guide = g;
         }
+        static void runHeuristic(){
+
+        }
+        static void optimizeLinearSpeed(){
+            
+        }
         void addCoordinate(Coordinates addition){
             locationList.push_back(addition);
             if(addition.x == locationList[locationList.size() - 2].x){
@@ -94,10 +100,6 @@ class Path{
                 else if(move == Direction::right) cout << " Right" << "(" << locationList[i].x << "," << locationList[i].y << ")"<< ",";
             }
             cout << endl;
-        }
-        void heuristic(){
-        }
-        void optimizeLinearSpeed(){
         }
 };
 
