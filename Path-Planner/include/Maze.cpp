@@ -155,9 +155,11 @@ class Maze{
         }
         void addStart(int x, int y){
             matrix[y][x].start = true;
+            start = Coordinates(x, y, maze, dimensions);
         }
         void addEnd(int x, int y){
             matrix[y][x].end = true;
+            end = Coordinates(x, y, maze, dimensions);
         }
         
         //* Maze Visualization Functions

@@ -131,12 +131,6 @@ int main(){
     mainMaze.addWalls(3, 2, false, false, true, false);
 
     //? Generate Path
-    Mat frame = Mat::zeros(dimensions, dimensions, CV_8UC3);
-    
-    frame = mainMaze.drawFrame(frame);
-
-    cv::imshow("frame", frame);
-    cv::waitKey(-1);
     getBestPath(mainMaze);    
     return 1;
 }
