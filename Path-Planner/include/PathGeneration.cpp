@@ -199,7 +199,7 @@ class PathGeneration{
                     }
                 }
             }
-            cout << currentBlock.currentLocation.
+            cout << currentBlock.currentLocation.x << " " << currentBlock.currentLocation.y << " " << endl;
             return BFS();
         }
         Path generatePath(const Block *node){
