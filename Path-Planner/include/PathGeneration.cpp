@@ -142,7 +142,7 @@ class PathGeneration{
             while(frontier.empty() == false) frontier.pop();
             explored.clear();
         }
-        void BFS(const Maze &curM){
+        void BFS(){
             // updating frontier
             if(frontier.size() == 0) {
                 cout << "FINISH : Insufficent Frontier!" << endl;
@@ -184,7 +184,7 @@ class PathGeneration{
                     frontier.push(transposedNode);
                 }else{
                     flag = true;
-                    Path checkPath =  generatePath(currentBlock, curM);
+                    Path checkPath =  generatePath(&currentBlock);
                     for(Coordinates point : checkPath.locationList){
                         if(point.x == transposedLocation.x && point.y == transposedLocation.y){
                             flag = false;
@@ -199,11 +199,12 @@ class PathGeneration{
                     }
                 }
             }
-            return BFS(curM);
+            cout << currentBlock.currentLocation.
+            return BFS();
         }
-        Path generatePath(const Block &node, const Maze &curMaze){
-            Block curNode = node;
-            Path ref = Path(curMaze);
+        Path generatePath(const Block *node){
+            Block curNode = *node;
+            Path ref = Path(outline);
             ref.addCoordinate(curNode.currentLocation);
             while(curNode.previousBlockIndex != -1){
                 curNode = explored[curNode.previousBlockIndex];

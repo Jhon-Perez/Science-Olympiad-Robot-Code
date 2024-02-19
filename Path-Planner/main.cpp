@@ -57,12 +57,12 @@ void getBestPath(Maze mainMaze){
         
         // Run BFS algorithm
         engine.reset(startingPoints, mainMaze.gates[target]);
-        engine.BFS(mainMaze);
+        engine.BFS();
         // Update Respective Paths
         engine.finalNodes[0];
         cout << "started parsing" << endl;
         for(int i = 0; i < engine.finalNodes.size(); i++){
-            Path tempPath = engine.generatePath(engine.finalNodes[i], mainMaze);
+            Path tempPath = engine.generatePath(&engine.finalNodes[i]);
             for(int j = 0; j < subPaths.size(); j++){
                 subPaths[j].addPath(tempPath);
             }
@@ -76,12 +76,12 @@ void getBestPath(Maze mainMaze){
     }
     // Run BFS algorithm
     engine.reset(startingPoints, mainMaze.end);
-    engine.BFS(mainMaze);
+    engine.BFS();
     // Update Respective Paths
     engine.finalNodes[0];
     cout << "started parsing" << endl;
     for(int i = 0; i < engine.finalNodes.size(); i++){
-        Path tempPath = engine.generatePath(engine.finalNodes[i], mainMaze);
+        Path tempPath = engine.generatePath(&engine.finalNodes[i]);
         for(int j = 0; j < subPaths.size(); j++){
             subPaths[j].addPath(tempPath);
         }
@@ -131,6 +131,12 @@ int main(){
     mainMaze.addWalls(3, 2, false, false, true, false);
 
     //? Generate Path
+    Mat frame = Mat::zeros(dimensions, dimensions, CV_8UC3);
+    
+    frame = mainMaze.drawFrame(frame);
+
+    cv::imshow("frame", frame);
+    cv::waitKey(-1);
     getBestPath(mainMaze);    
     return 1;
 }
