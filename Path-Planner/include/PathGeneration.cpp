@@ -80,7 +80,7 @@ class Path{
             for(Coordinates loc : locationList){
                 if(gateMatrix[loc.getY(coordinateType::maze)][loc.getX(coordinateType::maze)] == false){
                     gateMatrix[loc.getY(coordinateType::maze)][loc.getX(coordinateType::maze)] = true;
-                    if( guide.matrix[loc.getY(coordinateType::maze)][loc.getX(coordinateType::maze)].gateHere ) gates++;
+                    if( guide.matrix[loc.getY(coordinateType::maze)][loc.getX(coordinateType::maze)].isGate ) gates++;
                 }
             }
         }
@@ -142,7 +142,7 @@ class PathGeneration{
             while(frontier.empty() == false) frontier.pop();
             explored.clear();
         }
-        void BFS(Maze curM, int level = 0){
+        void BFS(const Maze &curM){
             // updating frontier
             if(frontier.size() == 0) {
                 cout << "FINISH : Insufficent Frontier!" << endl;
@@ -199,9 +199,9 @@ class PathGeneration{
                     }
                 }
             }
-            return BFS(curM, level + 1);
+            return BFS(curM);
         }
-        Path generatePath(Block node, Maze curMaze, int level = 0){
+        Path generatePath(const Block &node, const Maze &curMaze){
             Block curNode = node;
             Path ref = Path(curMaze);
             ref.addCoordinate(curNode.currentLocation);

@@ -87,7 +87,6 @@ void getBestPath(Maze mainMaze){
         }
     }
     //! Combining Paths
-    
     //! Displaying Output
     end = clock();
     frame = mainMaze.drawFrame(frame);
@@ -111,20 +110,27 @@ void getBestPath(Maze mainMaze){
 }
 
 int main(){
-    //! Defining the Maze Walls
-    vector<MazeBlockQuery> makeVector;
-    
-    makeVector.push_back(MazeBlockQuery(1, false, true));
-    makeVector.push_back(MazeBlockQuery(13, true, false));
-    makeVector.push_back(MazeBlockQuery(1, Maze::generateWallsList(false, true, false, true)));
-    makeVector.push_back(MazeBlockQuery(2, true, Maze::generateWallsList(false, false, false, true)));
-    makeVector.push_back(MazeBlockQuery(8, true, Maze::generateWallsList(true, false, false, false)));
-    makeVector.push_back(MazeBlockQuery(9, Maze::generateWallsList(false, true, false, true)));
-    makeVector.push_back(MazeBlockQuery(10, Maze::generateWallsList(true, false, false, false)));
-    makeVector.push_back(MazeBlockQuery(11, true, Maze::generateWallsList(false, true, false, false)));
-    
     //! Declaring Maze and Other Variables
-    Maze mainMaze = Maze(makeVector, dimensions);
+    Maze mainMaze = Maze(dimensions);
+    
+    //? Setting Checkpoints
+    mainMaze.addStart(1, 3);
+    mainMaze.addEnd(1, 0);
+
+    //? Add Gates
+    mainMaze.addGate(2, 0);
+    mainMaze.addGate(0, 2);
+    mainMaze.addGate(3, 2);
+
+    //? Add Walls
+    mainMaze.addWalls(1, 0, false, true, true, false);
+    mainMaze.addWalls(2, 0, false, true, false, true);
+    mainMaze.addWalls(0, 2, true, false, false, false);
+    mainMaze.addWalls(1, 2, false, true, true, false);
+    mainMaze.addWalls(2, 2, true, false, false, true);
+    mainMaze.addWalls(3, 2, false, false, true, false);
+
+    //? Generate Path
     getBestPath(mainMaze);    
     return 1;
 }

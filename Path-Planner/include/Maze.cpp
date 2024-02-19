@@ -22,6 +22,10 @@ using namespace std;
     +----+----+----+----+
 */
 
+/*
+
+*/
+
 enum Direction{
     top = 0, 
     bottom = 1, 
@@ -29,8 +33,8 @@ enum Direction{
     right = 3
 };
 
-struct mazeParameters{
-    int blockId;
+struct MazeBlock{
+    int blockId = -1;
     bool wallTop = false;
     bool wallBottom = false;
     bool wallLeft = false;
@@ -64,47 +68,6 @@ class MazeBlockQuery{
         MazeBlockQuery(int id, const vector<Direction> &wal){
             blockId = id;
             walls = wal;
-        }
-};
-
-class MazeBlock{
-    public :
-        // Wall Info
-        bool wallTop;
-        bool wallBottom;
-        bool wallLeft;
-        bool wallRight;
-        // Other Info
-        bool gateHere;
-        bool start;
-        bool end;
-    
-        MazeBlock(bool top, bool bottom, bool left, bool right, bool gate, bool d, bool s, bool e){
-            wallTop = top;
-            wallBottom = bottom;
-            wallLeft = left;
-            wallRight = right;
-            gateHere = gate;
-            start = s;
-            end = e;
-        }
-        MazeBlock(){
-            wallTop = false;
-            wallBottom = false;
-            wallLeft = false;
-            wallRight = false;
-            gateHere = false;
-            start = false;
-            end = false;
-        }
-        void modifyWalls(Direction side){
-            if(side == top) wallTop = true;
-            else if(side == bottom) wallBottom = true;
-            else if(side == Direction::right) wallRight = true;
-            else if(side == Direction::left) wallLeft = true;
-        }
-        void setGateValue(bool gateVal){
-            gateHere = gateVal;
         }
 };
 
@@ -142,39 +105,23 @@ class Maze{
         Coordinates start = Coordinates(0, 0);
         Coordinates end = Coordinates(0, 0);
         vector<Coordinates> gates;
-        void updateBlock(MazeBlockQuery query, int dimensions){
-            // updating walls
-            int y = query.blockId/4;
-            int x = query.blockId%4;
-            for(Direction wall : query.walls){
-                matrix[y][x].modifyWalls(wall);
-                switch(wall){
-                    case Direction::left: 
-                        if(x!=0) matrix[y][x - 1].modifyWalls(Direction::right);
-                        break;
-                    case Direction::right :
-                        if(x!=3) matrix[y][x + 1].modifyWalls(Direction::left);
-                        break;
-                    case Direction::bottom :
-                        if(y!=3) matrix[y + 1][x].modifyWalls(Direction::top);
-                        break;
-                    case Direction::top :
-                        if(y!=0) matrix[y - 1][x].modifyWalls(Direction::bottom);
-                        break;
+        int dimensions;
+
+        Maze(){}
+        Maze(int dimensions){
+            for(int i = 0; i < 4; i++)
+                for(int j = 0; j < 4; j++){
+                    matrix[i][j] = MazeBlock();
+                    if(i == 0)
+                        matrix[i][j].wallTop = true;
+                    else if(i == 3)
+                        matrix[i][j].wallBottom = true;
+                    if(j == 0)
+                        matrix[i][j].wallLeft = true;
+                    else if(j == 3)
+                        matrix[i][j].wallRight = true;
                 }
-            }
-            // updating gate status
-            matrix[y][x].setGateValue(query.isGate);
-            if(query.isGate){
-                cout << "x, y" << endl;
-                gates.push_back(Coordinates(x, y, maze, dimensions));
-            }
-            // updating start/finish status
-            if(query.end){                
-                end.updateCoordinates(x, y, coordinateType::maze, dimensions);
-            }else if(query.start){
-                start.updateCoordinates(x, y, coordinateType::maze, dimensions);
-            }
+            this->dimensions = dimensions;
         }
         int getGateId(Coordinates gateLoc){
             for(int i = 0; i < gates.size(); i++){
@@ -183,31 +130,38 @@ class Maze{
             }
             return -2;
         }
-        Maze(){}
-        Maze(vector<MazeBlockQuery> &modifications, int dimensions){
-            for(int i = 0; i < 4; i++)
-                for(int j = 0; j < 4; j++){
-                    matrix[i][j] = MazeBlock();
-                    if(i == 0){
-                        //cout << "wall top : " << j << "," << i << endl;
-                        matrix[i][j].wallTop = true;
-                    }else if(i == 3){
-                        //cout << "wall bottom : " << j << "," << i << endl;
-                        matrix[i][j].wallBottom = true;
-                    }
-                    if(j == 0){
-                        //cout << "wall left : " << j << "," << i << endl;
-                        matrix[i][j].wallLeft = true;
-                    }else if(j == 3){
-                        //cout << "wall right : " << j << "," << i << endl;
-                        matrix[i][j].wallRight = true;
-                    }
-                }
-            for(MazeBlockQuery mod : modifications){
-                updateBlock(mod, dimensions);
+        //* Initializing the Format of Maze
+        void addWalls(int x, int y, bool top, bool right, bool bottom, bool left){
+            if(left){
+                matrix[y][x].wallLeft = true;
+                if(x!=0) matrix[y][x - 1].wallRight = true;
+            }
+            if(right){
+                matrix[y][x].wallRight = true;
+                if(x!=3) matrix[y][x + 1].wallLeft = true;
+            }
+            if(top){
+                matrix[y][x].wallTop = true;
+                if(y!=0) matrix[y - 1][x].wallBottom = true;;
+            }
+            if(bottom){
+                matrix[y][x].wallBottom = true;
+                if(y!=3) matrix[y + 1][x].wallTop = true;
             }
         }
-        Mat drawFrame(Mat initialFrame){
+        void addGate(int x, int y){
+            matrix[y][x].isGate = true;
+            gates.push_back(Coordinates(x, y, maze, dimensions)); 
+        }
+        void addStart(int x, int y){
+            matrix[y][x].start = true;
+        }
+        void addEnd(int x, int y){
+            matrix[y][x].end = true;
+        }
+        
+        //* Maze Visualization Functions
+        Mat drawFrame(const Mat initialFrame){
             Mat frame = initialFrame.clone();
             Graphics g = Graphics();
             int dim = frame.size().height;
@@ -223,7 +177,7 @@ class Maze{
             for(int i = 0; i < 4; i++)
                 for(int j = 0; j < 4; j++){
                     Coordinates center = Coordinates(i, j, coordinateType::maze, dim);
-                    if(matrix[j][i].gateHere) g.drawRectangle(frame, center, dim/4, dim/4, cv::Scalar(255, 0, 0), 15);
+                    if(matrix[j][i].isGate) g.drawRectangle(frame, center, dim/4, dim/4, cv::Scalar(255, 0, 0), 15);
                 }
             // Drawing the walls
             for(int x = 0; x < 4; x++)
@@ -254,12 +208,14 @@ class Maze{
             g.drawCircle(frame, end, Scalar(0, 0, 255), 20, -1);
             return frame;
         }
-        Mat drawNode(Mat initialFrame, Block path, vector<Block> explored){
+        Mat drawNode(const Mat initialFrame, const Block path, const vector<Block> explored){
             Mat frame = initialFrame.clone();
             Graphics::drawLine(frame, path.currentLocation, (explored[path.previousBlockIndex].currentLocation), cv::Scalar(0, 255, 0), 15);
             return frame;
         }
-        static vector<Direction> generateWallsList(bool top, bool bottom, bool left, bool right){
+        
+        //* BFS Helpter Algorithms
+        static vector<Direction> generateWallsList(const bool top, const bool bottom, const bool left, const bool right){
             vector<Direction> answerVector;
             if(right) answerVector.push_back(Direction::right);
             if(left) answerVector.push_back(Direction::left);
@@ -267,8 +223,7 @@ class Maze{
             if(bottom) answerVector.push_back(Direction::bottom);
             return answerVector;
         }
-        // Search Funtions Methods
-        vector<Direction> getPossibleMoves(Coordinates loc){
+        vector<Direction> getPossibleMoves(const Coordinates loc){
             vector<Direction> movesList;
             MazeBlock currentBlock = matrix[loc.getY(coordinateType::maze)][loc.getX(coordinateType::maze)];
             if(currentBlock.wallTop == false) movesList.push_back(Direction::top);
@@ -277,7 +232,7 @@ class Maze{
             if(currentBlock.wallLeft == false) movesList.push_back(Direction::left);
             return movesList;
         }
-        Coordinates transpose(Coordinates loc, Direction moveDirection){
+        Coordinates transpose(const Coordinates loc, const Direction moveDirection){
             if(moveDirection == Direction::top) return Coordinates(loc.getX(coordinateType::maze), loc.getY(coordinateType::maze) - 1, coordinateType::maze, loc.dimensions);
             if(moveDirection == Direction::bottom){
                 Coordinates answer = Coordinates(loc.getX(coordinateType::maze), loc.getY(coordinateType::maze) + 1, coordinateType::maze, loc.dimensions);

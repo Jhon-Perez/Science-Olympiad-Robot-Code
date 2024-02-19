@@ -60,7 +60,7 @@ class Coordinates{
             if(n) cout << endl;
         }
         // Getter Methods
-        int getX(coordinateType type = coordinateType::raw){
+        int getX(coordinateType type = coordinateType::raw) const {
             if(type == coordinateType::maze){
                 int xRaw = x + dimensions/2;
                 return (xRaw - dimensions/8) * 4/dimensions;
@@ -70,7 +70,7 @@ class Coordinates{
                 return x;
             }
         }
-        int getY(coordinateType type = coordinateType::raw){
+        int getY(coordinateType type = coordinateType::raw) const {
             if(type == coordinateType::maze){
                 int yRaw = dimensions/2 - y;
                 return (yRaw - dimensions/8) * 4/dimensions;
@@ -80,20 +80,20 @@ class Coordinates{
                 return y;
             }
         }
-        tuple<int, int> getXAndY(coordinateType type = coordinateType::raw){
+        tuple<int, int> getXAndY(coordinateType type = coordinateType::raw) const {
             return make_tuple(getX(type), getY(type));
         }
         // Other Methods
-        Coordinates addX(int deltaX){
+        Coordinates addX(int deltaX) const {
             return Coordinates(x + deltaX, y);
         }
-        Coordinates addY(int deltaY){
+        Coordinates addY(int deltaY) const {
             return Coordinates(x, y + deltaY);
         }
-        Coordinates addXandY(int deltaX, int deltaY){
+        Coordinates addXandY(int deltaX, int deltaY) const {
             return Coordinates(x + deltaX, y + deltaY, euler, dimensions);
         }
-        bool operator ==(const Coordinates &other) const {
+        bool operator == (const Coordinates &other) const {
             return x == other.x && y == other.y;
         }
 };

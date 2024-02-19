@@ -11,7 +11,8 @@
         "__split_buffer": "cpp",
         "deque": "cpp",
         "list": "cpp",
-        "string": "cpp"
+        "string": "cpp",
+        "unordered_map": "cpp"
     },
     "cmake.sourceDirectory": "/Users/joshikvarshik/Documents/unnam/joshik/coding/Science-Olympiad-Robot-Code/Path-Planner"
 }

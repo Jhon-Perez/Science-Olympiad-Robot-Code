@@ -1,3 +1,3 @@
-/Users/joshikvarshik/Documents/unnam/joshik/coding/Science-Olympiad-Robot-Code/path-planner/build/CMakeFiles/MyProject.dir
-/Users/joshikvarshik/Documents/unnam/joshik/coding/Science-Olympiad-Robot-Code/path-planner/build/CMakeFiles/edit_cache.dir
-/Users/joshikvarshik/Documents/unnam/joshik/coding/Science-Olympiad-Robot-Code/path-planner/build/CMakeFiles/rebuild_cache.dir
+/Users/joshikvarshik/documents/unnam/joshik/coding/Science-Olympiad-Robot-Code/Path-Planner/build/CMakeFiles/MyProject.dir
+/Users/joshikvarshik/documents/unnam/joshik/coding/Science-Olympiad-Robot-Code/Path-Planner/build/CMakeFiles/edit_cache.dir
+/Users/joshikvarshik/documents/unnam/joshik/coding/Science-Olympiad-Robot-Code/Path-Planner/build/CMakeFiles/rebuild_cache.dir
